@@ -1,4 +1,4 @@
-# 🎲 Raffle GodFather - Party Raffle System
+# 🎲 Raffle Club - Party Raffle System
 
 A monorepo application for managing party raffle systems with support for multiple club entities.
 
