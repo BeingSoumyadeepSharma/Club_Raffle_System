@@ -1,0 +1,21 @@
+{
+  "name": "raffle-godfather",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace=@raffle/backend",
+    "dev:frontend": "npm run dev --workspace=@raffle/frontend",
+    "dev:all": "npm run dev --workspace=@raffle/backend & npm run dev --workspace=@raffle/frontend",
+    "build": "npm run build --workspaces",
+    "build:shared": "npm run build --workspace=@raffle/shared",
+    "start": "npm run start --workspace=@raffle/backend",
+    "start:frontend": "npm run start --workspace=@raffle/frontend",
+    "test": "npm run test --workspaces --if-present"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3"
+  }
+}
