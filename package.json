@@ -9,8 +9,10 @@
     "dev": "npm run dev --workspace=@raffle/backend",
     "dev:frontend": "npm run dev --workspace=@raffle/frontend",
     "dev:all": "npm run dev --workspace=@raffle/backend & npm run dev --workspace=@raffle/frontend",
-    "build": "npm run build --workspaces",
+    "build": "npm run build:shared && npm run build --workspace=@raffle/backend && npm run build --workspace=@raffle/frontend",
     "build:shared": "npm run build --workspace=@raffle/shared",
+    "build:backend": "npm run build:shared && npm run build --workspace=@raffle/backend",
+    "build:frontend": "npm run build:shared && npm run build --workspace=@raffle/frontend",
     "start": "npm run start --workspace=@raffle/backend",
     "start:frontend": "npm run start --workspace=@raffle/frontend",
     "test": "npm run test --workspaces --if-present"
