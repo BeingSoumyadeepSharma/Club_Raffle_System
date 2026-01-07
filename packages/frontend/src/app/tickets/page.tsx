@@ -157,9 +157,12 @@ export default function TicketsPage() {
 
   const totalTickets = purchases.reduce((acc, p) => acc + p.ticketCount, 0);
   const totalRevenue = purchases.reduce((acc, p) => acc + p.totalPrice, 0);
-  const winningAmount = Math.floor(totalRevenue * 0.7);
-
+  
   const selectedEntityData = entities.find(e => e.id === selectedEntity);
+  
+  // Use entity's raffle percentage or default to 70%
+  const rafflePercentage = selectedEntityData?.rafflePercentage ?? 70;
+  const winningAmount = Math.floor(totalRevenue * (rafflePercentage / 100));
 
   // Generate announcement text (split into two parts for character limits)
   const rafflerName = user?.rafflerName || "";
@@ -269,7 +272,7 @@ export default function TicketsPage() {
           <p className="text-xl sm:text-2xl font-bold">${totalRevenue.toFixed(2)}</p>
         </Card>
         <Card className="p-3 sm:p-4 bg-gradient-to-r from-amber-500/10 to-yellow-500/10 border-amber-500/50">
-          <p className="text-xs sm:text-sm text-muted-foreground">🏆 Prize (70%)</p>
+          <p className="text-xs sm:text-sm text-muted-foreground">🏆 Prize ({rafflePercentage}%)</p>
           <p className="text-xl sm:text-2xl font-bold text-amber-500">${winningAmount.toFixed(2)}</p>
         </Card>
       </div>
