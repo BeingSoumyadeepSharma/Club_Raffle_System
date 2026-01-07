@@ -21,7 +21,7 @@ interface CreateEntityDialogProps {
   onSuccess?: (entity: ClubEntity) => void;
 }
 
-const EMOJI_OPTIONS = ["🎲", "🎰", "🎪", "🎭", "🎯", "🃏", "🎴", "💎", "👑", "🌟", "🌒"];
+const EMOJI_OPTIONS = ["🎲", "🎰", "🎭", "🎯", "💎", "👑", "🌟", "🌒", "🖤🖤🖤"];
 
 export function CreateEntityDialog({ onSuccess }: CreateEntityDialogProps) {
   const [open, setOpen] = useState(false);

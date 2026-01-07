@@ -4,13 +4,14 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { PurchaseCard } from "@/components/purchase-card";
 import { PurchaseTicketsDialog } from "@/components/purchase-tickets-dialog";
-import { AnnouncementDialog } from "@/components/announcement-dialog";
 import { ReceiptModal } from "@/components/receipt-modal";
 import { SessionControl } from "@/components/session-control";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -18,9 +19,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ClubEntity, TicketPurchase, Session, getEntities, getPurchases, getPurchasesByEntity, getExportAllUrl, getExportEntityUrl, getActiveSession } from "@/lib/api";
+import { ClubEntity, TicketPurchase, Session, getEntities, getPurchases, getPurchasesByEntity, getExportAllUrl, getExportEntityUrl, getActiveSession, resetTicketCounter } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
-import { FileSpreadsheet, History } from "lucide-react";
+import { FileSpreadsheet, History, Copy, Check, RotateCcw } from "lucide-react";
 
 export default function TicketsPage() {
   const [entities, setEntities] = useState<ClubEntity[]>([]);
@@ -32,6 +33,8 @@ export default function TicketsPage() {
   const [showReceipt, setShowReceipt] = useState(false);
   const [loading, setLoading] = useState(true);
   const [initialized, setInitialized] = useState(false);
+  const [pricePerTicket, setPricePerTicket] = useState("100");
+  const [copied, setCopied] = useState(false);
   const { user, isLoading: authLoading } = useAuth();
   const router = useRouter();
 
@@ -155,6 +158,38 @@ export default function TicketsPage() {
 
   const selectedEntityData = entities.find(e => e.id === selectedEntity);
 
+  // Generate announcement text
+  const rafflerName = user?.rafflerName || "";
+  const generateAnnouncementText = () => {
+    if (!selectedEntityData || selectedEntity === "all") return "";
+    return `${selectedEntityData.emoji}Hey everyone, I am your RAFFLER for today. Tickets are $${pricePerTicket} each. PM me for Tickets, UNLIMITED Available!! ${selectedEntityData.emoji}
+${totalTickets} tickets sold in total. ♥ WINNING AMOUNT is now $${winningAmount} !! Get your tickets for your lucky chance!~ ♥`;
+  };
+
+  const announcementText = generateAnnouncementText();
+
+  const handleCopyAnnouncement = async () => {
+    await navigator.clipboard.writeText(announcementText);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleResetCounter = async () => {
+    if (!selectedEntity || selectedEntity === "all") return;
+    
+    if (confirm("Are you sure you want to reset the ticket counter? This will start ticket numbers from 1 again.")) {
+      try {
+        const success = await resetTicketCounter(selectedEntity);
+        if (success) {
+          alert("Ticket counter has been reset to 0!");
+          loadData();
+        }
+      } catch (error) {
+        console.error("Failed to reset counter:", error);
+      }
+    }
+  };
+
   // Show loading while checking auth, initializing, or if not logged in (will redirect)
   if (authLoading || !user || !initialized || (loading && entities.length === 0)) {
     return (
@@ -177,7 +212,6 @@ export default function TicketsPage() {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <AnnouncementDialog entities={entities} onCounterReset={loadData} />
           <Button variant="outline" className="gap-2 flex-1 sm:flex-none" asChild>
             <a href={getExportAllUrl()} download>
               <FileSpreadsheet className="h-4 w-4" />
@@ -210,6 +244,66 @@ export default function TicketsPage() {
           <p className="text-xl sm:text-2xl font-bold text-amber-500">${winningAmount.toFixed(2)}</p>
         </Card>
       </div>
+
+      {/* Announcement Section - only show when a specific entity is selected */}
+      {selectedEntity !== "all" && selectedEntityData && (
+        <Card className="p-4 space-y-3">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <h3 className="font-semibold flex items-center gap-2">
+              📢 Quick Announcement
+              {rafflerName && <span className="text-sm font-normal text-muted-foreground">• {rafflerName}</span>}
+            </h3>
+            <div className="flex items-center gap-2">
+              <Label htmlFor="price" className="text-sm whitespace-nowrap">$/ticket:</Label>
+              <Input
+                id="price"
+                type="number"
+                min="0"
+                step="1"
+                value={pricePerTicket}
+                onChange={(e) => setPricePerTicket(e.target.value)}
+                className="w-20 h-8"
+              />
+            </div>
+          </div>
+          <div className="relative">
+            <Textarea
+              value={announcementText}
+              readOnly
+              className="min-h-[80px] pr-24 text-sm resize-none"
+            />
+            <div className="absolute top-2 right-2 flex gap-1">
+              <Button
+                size="icon"
+                variant="ghost"
+                className="h-8 w-8"
+                onClick={handleCopyAnnouncement}
+                title="Copy announcement"
+              >
+                {copied ? (
+                  <Check className="h-4 w-4 text-green-500" />
+                ) : (
+                  <Copy className="h-4 w-4" />
+                )}
+              </Button>
+              <Button
+                size="icon"
+                variant="ghost"
+                className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-500/10"
+                onClick={handleResetCounter}
+                title="Reset ticket counter"
+              >
+                <RotateCcw className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+          {!rafflerName && (
+            <p className="text-xs text-muted-foreground">
+              💡 Set your Raffler Name in User Management to personalize announcements.
+            </p>
+          )}
+        </Card>
+      )}
 
       {/* Filter and Session Control */}
       <div className="space-y-4">
