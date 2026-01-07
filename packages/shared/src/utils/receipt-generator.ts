@@ -36,10 +36,10 @@ ${entity.emoji} ${entity.displayName} ${styledRaffle} ${entity.emoji}
 ${entity.tagline}
 ${divider}
 ${giftLine}Buyer: ${purchase.buyerName}
-Tickets purchased: ${purchase.ticketCount}
 Price per ticket: $${purchase.pricePerTicket}
 Total Price: $${purchase.totalPrice}
-Ticket Numbers: ${purchase.startTicketNumber}-${purchase.endTicketNumber}
+Tickets purchased: ${purchase.ticketCount}
+Ticket Numbers: #${purchase.startTicketNumber}-#${purchase.endTicketNumber}
 Raffler Name: ${purchase.rafflerName}
 ${divider}
 `.trim();
@@ -56,10 +56,10 @@ ${data.entityEmoji} ${data.entityName} ${styledRaffle} ${data.entityEmoji}
 Thanks for your Purchase.. and good luck~
 ${divider}
 Buyer: ${data.buyerName}
-Tickets purchased: ${data.ticketCount}
 Price per ticket: $${data.pricePerTicket}
 Total Price: $${data.totalPrice}
-Ticket Numbers: ${data.ticketRange}
+Tickets purchased: ${data.ticketCount}
+Ticket Numbers: #${data.ticketRange}
 Raffler Name: ${data.rafflerName}
 ${divider}
 `.trim();
