@@ -3,6 +3,6 @@
   "/entities/page": "app/entities/page.js",
   "/login/page": "app/login/page.js",
   "/tickets/page": "app/tickets/page.js",
-  "/users/page": "app/users/page.js",
-  "/page": "app/page.js"
+  "/page": "app/page.js",
+  "/users/page": "app/users/page.js"
 }

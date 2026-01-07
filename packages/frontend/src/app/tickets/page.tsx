@@ -163,6 +163,7 @@ export default function TicketsPage() {
   // Use entity's raffle percentage or default to 70%
   const rafflePercentage = selectedEntityData?.rafflePercentage ?? 70;
   const winningAmount = Math.floor(totalRevenue * (rafflePercentage / 100));
+  const earnings = totalRevenue - winningAmount;
 
   // Generate announcement text (split into two parts for character limits)
   const rafflerName = user?.rafflerName || "";
@@ -258,7 +259,7 @@ export default function TicketsPage() {
       </div>
 
       {/* Summary Stats */}
-      <div className="grid gap-3 sm:gap-4 grid-cols-2 md:grid-cols-4">
+      <div className="grid gap-3 sm:gap-4 grid-cols-2 md:grid-cols-5">
         <Card className="p-3 sm:p-4">
           <p className="text-xs sm:text-sm text-muted-foreground">Total Purchases</p>
           <p className="text-xl sm:text-2xl font-bold">{purchases.length}</p>
@@ -274,6 +275,10 @@ export default function TicketsPage() {
         <Card className="p-3 sm:p-4 bg-gradient-to-r from-amber-500/10 to-yellow-500/10 border-amber-500/50">
           <p className="text-xs sm:text-sm text-muted-foreground">🏆 Prize ({rafflePercentage}%)</p>
           <p className="text-xl sm:text-2xl font-bold text-amber-500">${winningAmount.toFixed(2)}</p>
+        </Card>
+        <Card className="p-3 sm:p-4 bg-gradient-to-r from-green-500/10 to-emerald-500/10 border-green-500/50">
+          <p className="text-xs sm:text-sm text-muted-foreground">💰 Earnings ({100 - rafflePercentage}%)</p>
+          <p className="text-xl sm:text-2xl font-bold text-green-500">${earnings.toFixed(2)}</p>
         </Card>
       </div>
 
