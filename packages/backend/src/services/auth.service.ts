@@ -86,6 +86,7 @@ export class AuthService {
       username: dto.username,
       passwordHash: hashPassword(dto.password),
       role: dto.role,
+      rafflerName: dto.rafflerName,
       createdAt: now,
       updatedAt: now
     };
@@ -100,6 +101,14 @@ export class AuthService {
     }
 
     return createdUser;
+  }
+
+  updateRafflerName(userId: string, rafflerName: string, requesterId: string): boolean {
+    // Users can only update their own raffler name
+    if (requesterId !== userId) {
+      return false;
+    }
+    return userRepository.updateRafflerName(userId, rafflerName);
   }
 
   updatePassword(userId: string, newPassword: string, requesterRole: UserRole, requesterId: string): boolean {

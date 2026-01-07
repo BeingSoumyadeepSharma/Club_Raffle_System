@@ -24,7 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { UserPlus, Trash2, Shield, Key, Plus, X, Crown, Briefcase, Users } from "lucide-react";
+import { UserPlus, Trash2, Shield, Key, Plus, X, Crown, Briefcase, Users, Pencil } from "lucide-react";
 import { getEntities, ClubEntity } from "@/lib/api";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api";
@@ -33,6 +33,7 @@ interface UserWithEntities {
   id: string;
   username: string;
   role: UserRole;
+  rafflerName?: string;
   assignedEntities: string[];
   createdAt: string;
 }
@@ -66,6 +67,7 @@ export default function UsersPage() {
   const [newUsername, setNewUsername] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [newRole, setNewRole] = useState<UserRole>("staff");
+  const [newRafflerName, setNewRafflerName] = useState("");
   const [creating, setCreating] = useState(false);
 
   // Assign entity dialog state
@@ -77,6 +79,11 @@ export default function UsersPage() {
   const [passwordOpen, setPasswordOpen] = useState(false);
   const [passwordUserId, setPasswordUserId] = useState<string | null>(null);
   const [newUserPassword, setNewUserPassword] = useState("");
+
+  // Raffler name dialog state
+  const [rafflerNameOpen, setRafflerNameOpen] = useState(false);
+  const [rafflerNameUserId, setRafflerNameUserId] = useState<string | null>(null);
+  const [editRafflerName, setEditRafflerName] = useState("");
 
   useEffect(() => {
     if (!isLoading && !user) {
@@ -148,6 +155,7 @@ export default function UsersPage() {
           username: newUsername,
           password: newPassword,
           role: newRole,
+          rafflerName: newRafflerName || undefined,
         }),
       });
 
@@ -156,6 +164,7 @@ export default function UsersPage() {
         setCreateOpen(false);
         setNewUsername("");
         setNewPassword("");
+        setNewRafflerName("");
         setNewRole(creatableRoles[creatableRoles.length - 1] || "staff");
         loadUsers();
       } else {
@@ -265,6 +274,33 @@ export default function UsersPage() {
     }
   };
 
+  const handleUpdateRafflerName = async () => {
+    if (!rafflerNameUserId) return;
+
+    try {
+      const res = await fetch(`${API_BASE}/auth/users/${rafflerNameUserId}/raffler-name`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          ...getAuthHeaders(),
+        },
+        body: JSON.stringify({ rafflerName: editRafflerName }),
+      });
+
+      if (res.ok) {
+        setRafflerNameOpen(false);
+        setRafflerNameUserId(null);
+        setEditRafflerName("");
+        loadUsers();
+      } else {
+        const json = await res.json();
+        alert(json.error || "Failed to update raffler name");
+      }
+    } catch (error) {
+      console.error("Failed to update raffler name:", error);
+    }
+  };
+
   const getEntityName = (entityId: string) => {
     const entity = entities.find((e) => e.id === entityId);
     return entity ? `${entity.emoji} ${entity.displayName}` : entityId;
@@ -324,6 +360,17 @@ export default function UsersPage() {
                   />
                 </div>
                 <div className="grid gap-2">
+                  <Label>Raffler Name (Optional)</Label>
+                  <Input
+                    value={newRafflerName}
+                    onChange={(e) => setNewRafflerName(e.target.value)}
+                    placeholder="Name used for raffle entries"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    This name will auto-fill when purchasing tickets or making announcements
+                  </p>
+                </div>
+                <div className="grid gap-2">
                   <Label>Role</Label>
                   <Select value={newRole} onValueChange={(value) => setNewRole(value as UserRole)}>
                     <SelectTrigger>
@@ -375,6 +422,22 @@ export default function UsersPage() {
                     </Badge>
                   </CardTitle>
                   <div className="flex gap-2 flex-wrap">
+                    {/* Show raffler name edit button for own account */}
+                    {u.id === user?.id && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="gap-1 text-xs sm:text-sm"
+                        onClick={() => {
+                          setRafflerNameUserId(u.id);
+                          setEditRafflerName(u.rafflerName || "");
+                          setRafflerNameOpen(true);
+                        }}
+                      >
+                        <Pencil className="h-4 w-4" />
+                        <span className="hidden sm:inline">Raffler Name</span>
+                      </Button>
+                    )}
                     {/* Show password button for own account or manageable users */}
                     {(u.id === user?.id || canManageUser(u)) && (
                       <Button
@@ -408,6 +471,7 @@ export default function UsersPage() {
                 </div>
                 <CardDescription className="text-xs sm:text-sm">
                   Created: {new Date(u.createdAt).toLocaleDateString()}
+                  {u.rafflerName && <span className="ml-2">• Raffler: {u.rafflerName}</span>}
                 </CardDescription>
               </CardHeader>
               <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
@@ -523,6 +587,31 @@ export default function UsersPage() {
           <DialogFooter>
             <Button onClick={handleUpdatePassword} disabled={newUserPassword.length < 4}>
               Update Password
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Update Raffler Name Dialog */}
+      <Dialog open={rafflerNameOpen} onOpenChange={setRafflerNameOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Update Raffler Name</DialogTitle>
+            <DialogDescription>
+              This name will auto-fill when purchasing tickets or making announcements.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <Label>Raffler Name</Label>
+            <Input
+              value={editRafflerName}
+              onChange={(e) => setEditRafflerName(e.target.value)}
+              placeholder="Enter your name for raffle entries"
+            />
+          </div>
+          <DialogFooter>
+            <Button onClick={handleUpdateRafflerName}>
+              Update Raffler Name
             </Button>
           </DialogFooter>
         </DialogContent>

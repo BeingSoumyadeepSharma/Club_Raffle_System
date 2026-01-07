@@ -19,6 +19,7 @@ export interface User {
   id: string;
   username: string;
   role: UserRole;
+  rafflerName?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -37,6 +38,7 @@ export interface CreateUserDTO {
   username: string;
   password: string;
   role: UserRole;
+  rafflerName?: string;
 }
 
 export interface LoginDTO {

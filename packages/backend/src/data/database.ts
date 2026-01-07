@@ -211,6 +211,18 @@ export async function initializeDatabase(): Promise<void> {
     console.error('Raffle percentage migration error:', e);
   }
 
+  // Add raffler_name column to users if it doesn't exist
+  try {
+    const userTableInfo = db.exec("PRAGMA table_info(users)");
+    const userColumns = userTableInfo[0]?.values?.map(row => row[1]) || [];
+    
+    if (!userColumns.includes('raffler_name')) {
+      db.run("ALTER TABLE users ADD COLUMN raffler_name TEXT");
+    }
+  } catch (e) {
+    console.error('Raffler name migration error:', e);
+  }
+
   // Insert default GODFATHER'S CLUB entity if not exists
   const result = db.exec('SELECT id FROM entities WHERE id = ?', ['godfather-club']);
   if (result.length === 0 || result[0].values.length === 0) {

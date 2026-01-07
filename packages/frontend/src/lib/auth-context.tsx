@@ -17,6 +17,7 @@ export interface User {
   id: string;
   username: string;
   role: UserRole;
+  rafflerName?: string;
   assignedEntities: string[];
   createdAt: string;
   updatedAt: string;
@@ -32,6 +33,8 @@ interface AuthContextType {
   canCreateClubs: () => boolean;
   canEditClubInfo: () => boolean;
   canManageUsers: () => boolean;
+  updateRafflerName: (rafflerName: string) => Promise<boolean>;
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -125,6 +128,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return user.role !== 'staff';
   };
 
+  const updateRafflerName = async (rafflerName: string): Promise<boolean> => {
+    if (!user || !token) return false;
+    
+    try {
+      const res = await fetch(`${API_BASE}/auth/users/${user.id}/raffler-name`, {
+        method: "PATCH",
+        headers: { 
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}` 
+        },
+        body: JSON.stringify({ rafflerName }),
+      });
+      
+      if (res.ok) {
+        setUser({ ...user, rafflerName });
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error("Failed to update raffler name:", error);
+      return false;
+    }
+  };
+
+  const refreshUser = async (): Promise<void> => {
+    if (token) {
+      await fetchCurrentUser(token);
+    }
+  };
+
   return (
     <AuthContext.Provider value={{ 
       user, 
@@ -135,7 +168,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       hasAccessToEntity,
       canCreateClubs,
       canEditClubInfo,
-      canManageUsers
+      canManageUsers,
+      updateRafflerName,
+      refreshUser
     }}>
       {children}
     </AuthContext.Provider>

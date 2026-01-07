@@ -123,6 +123,27 @@ router.patch('/users/:id/password', requireAuth, (req: Request, res: Response) =
   res.json({ success: true, message: 'Password updated' });
 });
 
+// Update user raffler name
+router.patch('/users/:id/raffler-name', requireAuth, (req: Request, res: Response) => {
+  const { rafflerName } = req.body;
+  
+  if (rafflerName === undefined) {
+    return res.status(400).json({ success: false, error: 'Raffler name required' });
+  }
+
+  const success = authService.updateRafflerName(
+    req.params.id, 
+    rafflerName,
+    req.user!.userId
+  );
+  
+  if (!success) {
+    return res.status(403).json({ success: false, error: 'Cannot update raffler name - you can only update your own' });
+  }
+
+  res.json({ success: true, message: 'Raffler name updated' });
+});
+
 // Delete user
 router.delete('/users/:id', requireAuth, requireCanManageUsers, (req: Request, res: Response) => {
   // Prevent self-deletion

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/select";
 import { ClubEntity, purchaseTickets } from "@/lib/api";
 import { Ticket } from "lucide-react";
+import { useAuth } from "@/lib/auth-context";
 
 interface PurchaseTicketsDialogProps {
   entities: ClubEntity[];
@@ -35,6 +36,7 @@ export function PurchaseTicketsDialog({
   selectedEntityId,
   onSuccess,
 }: PurchaseTicketsDialogProps) {
+  const { user } = useAuth();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [entityId, setEntityId] = useState(selectedEntityId || "");
@@ -44,6 +46,20 @@ export function PurchaseTicketsDialog({
   const [pricePerTicket, setPricePerTicket] = useState("100");
   const [isGift, setIsGift] = useState(false);
   const [gifterName, setGifterName] = useState("");
+
+  // Auto-fill raffler name from user and entity from selectedEntityId or user's assigned entities
+  useEffect(() => {
+    if (user?.rafflerName) {
+      setRafflerName(user.rafflerName);
+    }
+    // If no selectedEntityId, default to user's first assigned entity
+    if (!selectedEntityId && user?.assignedEntities?.length) {
+      const firstAccessibleEntity = entities.find(e => user.assignedEntities.includes(e.id));
+      if (firstAccessibleEntity) {
+        setEntityId(firstAccessibleEntity.id);
+      }
+    }
+  }, [user, selectedEntityId, entities]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,9 +79,8 @@ export function PurchaseTicketsDialog({
       if (result) {
         onSuccess?.(result.receipt);
         setOpen(false);
-        // Reset form
+        // Reset form but keep raffler name and entity
         setBuyerName("");
-        setRafflerName("");
         setTicketCount("1");
         setIsGift(false);
         setGifterName("");

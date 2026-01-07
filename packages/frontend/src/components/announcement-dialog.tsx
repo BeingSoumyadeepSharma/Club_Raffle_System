@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/select";
 import { ClubEntity, generateAnnouncement, resetTicketCounter } from "@/lib/api";
 import { Megaphone, RotateCcw, Copy, Check } from "lucide-react";
+import { useAuth } from "@/lib/auth-context";
 
 interface AnnouncementDialogProps {
   entities: ClubEntity[];
@@ -30,6 +31,7 @@ interface AnnouncementDialogProps {
 }
 
 export function AnnouncementDialog({ entities, onCounterReset }: AnnouncementDialogProps) {
+  const { user } = useAuth();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [entityId, setEntityId] = useState("");
@@ -37,6 +39,20 @@ export function AnnouncementDialog({ entities, onCounterReset }: AnnouncementDia
   const [pricePerTicket, setPricePerTicket] = useState("100");
   const [announcement, setAnnouncement] = useState("");
   const [copied, setCopied] = useState(false);
+
+  // Auto-fill raffler name from user and entity from user's assigned entities
+  useEffect(() => {
+    if (user?.rafflerName) {
+      setRafflerName(user.rafflerName);
+    }
+    // Default to user's first assigned entity
+    if (!entityId && user?.assignedEntities?.length) {
+      const firstAccessibleEntity = entities.find(e => user.assignedEntities.includes(e.id));
+      if (firstAccessibleEntity) {
+        setEntityId(firstAccessibleEntity.id);
+      }
+    }
+  }, [user, entities, entityId]);
 
   const handleGenerate = async () => {
     if (!entityId || !rafflerName || !pricePerTicket) return;

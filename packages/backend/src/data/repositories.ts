@@ -393,6 +393,7 @@ function mapUserFromDb(row: any): User {
     id: row.id,
     username: row.username,
     role,
+    rafflerName: row.raffler_name || undefined,
     createdAt: new Date(row.created_at),
     updatedAt: new Date(row.updated_at)
   };
@@ -424,13 +425,14 @@ export const userRepository = {
 
   create(user: UserWithPassword): User {
     run(
-      `INSERT INTO users (id, username, password_hash, role, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO users (id, username, password_hash, role, raffler_name, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
       [
         user.id,
         user.username,
         user.passwordHash,
         user.role,
+        user.rafflerName || null,
         user.createdAt.toISOString(),
         user.updatedAt.toISOString()
       ]
@@ -439,9 +441,19 @@ export const userRepository = {
       id: user.id,
       username: user.username,
       role: user.role,
+      raffler_name: user.rafflerName,
       created_at: user.createdAt.toISOString(),
       updated_at: user.updatedAt.toISOString()
     });
+  },
+
+  updateRafflerName(id: string, rafflerName: string): boolean {
+    const user = this.findById(id);
+    if (!user) return false;
+    
+    const now = new Date().toISOString();
+    run('UPDATE users SET raffler_name = ?, updated_at = ? WHERE id = ?', [rafflerName, now, id]);
+    return true;
   },
 
   updatePassword(id: string, passwordHash: string): boolean {
