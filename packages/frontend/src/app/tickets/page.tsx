@@ -34,7 +34,8 @@ export default function TicketsPage() {
   const [loading, setLoading] = useState(true);
   const [initialized, setInitialized] = useState(false);
   const [pricePerTicket, setPricePerTicket] = useState("100");
-  const [copied, setCopied] = useState(false);
+  const [copied1, setCopied1] = useState(false);
+  const [copied2, setCopied2] = useState(false);
   const { user, isLoading: authLoading } = useAuth();
   const router = useRouter();
 
@@ -160,20 +161,31 @@ export default function TicketsPage() {
 
   const selectedEntityData = entities.find(e => e.id === selectedEntity);
 
-  // Generate announcement text
+  // Generate announcement text (split into two parts for character limits)
   const rafflerName = user?.rafflerName || "";
-  const generateAnnouncementText = () => {
+  const generateAnnouncementPart1 = () => {
     if (!selectedEntityData || selectedEntity === "all") return "";
-    return `${selectedEntityData.emoji}Hey everyone, I am your RAFFLER for today. Tickets are $${pricePerTicket} each. PM me for Tickets, UNLIMITED Available!! ${selectedEntityData.emoji}
-${totalTickets} tickets sold in total. ♥ WINNING AMOUNT is now $${winningAmount} !! Get your tickets for your lucky chance!~ ♥`;
+    return `${selectedEntityData.emoji}Hey everyone, I am your RAFFLER for today. Tickets are $${pricePerTicket} each. PM me for Tickets, UNLIMITED Available!! ${selectedEntityData.emoji}`;
   };
 
-  const announcementText = generateAnnouncementText();
+  const generateAnnouncementPart2 = () => {
+    if (!selectedEntityData || selectedEntity === "all") return "";
+    return `${totalTickets} tickets sold in total. ♥ WINNING AMOUNT is now $${winningAmount} !! Get your tickets for your lucky chance!~ ♥`;
+  };
 
-  const handleCopyAnnouncement = async () => {
-    await navigator.clipboard.writeText(announcementText);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+  const announcementPart1 = generateAnnouncementPart1();
+  const announcementPart2 = generateAnnouncementPart2();
+
+  const handleCopyPart1 = async () => {
+    await navigator.clipboard.writeText(announcementPart1);
+    setCopied1(true);
+    setTimeout(() => setCopied1(false), 2000);
+  };
+
+  const handleCopyPart2 = async () => {
+    await navigator.clipboard.writeText(announcementPart2);
+    setCopied2(true);
+    setTimeout(() => setCopied2(false), 2000);
   };
 
   const handleResetCounter = async () => {
@@ -281,28 +293,6 @@ ${totalTickets} tickets sold in total. ♥ WINNING AMOUNT is now $${winningAmoun
                 onChange={(e) => setPricePerTicket(e.target.value)}
                 className="w-20 h-8"
               />
-            </div>
-          </div>
-          <div className="relative">
-            <Textarea
-              value={announcementText}
-              readOnly
-              className="min-h-[80px] pr-24 text-sm resize-none"
-            />
-            <div className="absolute top-2 right-2 flex gap-1">
-              <Button
-                size="icon"
-                variant="ghost"
-                className="h-8 w-8"
-                onClick={handleCopyAnnouncement}
-                title="Copy announcement"
-              >
-                {copied ? (
-                  <Check className="h-4 w-4 text-green-500" />
-                ) : (
-                  <Copy className="h-4 w-4" />
-                )}
-              </Button>
               <Button
                 size="icon"
                 variant="ghost"
@@ -314,6 +304,57 @@ ${totalTickets} tickets sold in total. ♥ WINNING AMOUNT is now $${winningAmoun
               </Button>
             </div>
           </div>
+          
+          {/* Part 1: Introduction */}
+          <div className="space-y-1">
+            <Label className="text-xs text-muted-foreground">Part 1 - Introduction</Label>
+            <div className="relative">
+              <Textarea
+                value={announcementPart1}
+                readOnly
+                className="min-h-[50px] pr-12 text-sm resize-none"
+              />
+              <Button
+                size="icon"
+                variant="ghost"
+                className="absolute top-2 right-2 h-8 w-8"
+                onClick={handleCopyPart1}
+                title="Copy part 1"
+              >
+                {copied1 ? (
+                  <Check className="h-4 w-4 text-green-500" />
+                ) : (
+                  <Copy className="h-4 w-4" />
+                )}
+              </Button>
+            </div>
+          </div>
+
+          {/* Part 2: Stats */}
+          <div className="space-y-1">
+            <Label className="text-xs text-muted-foreground">Part 2 - Stats & Prize</Label>
+            <div className="relative">
+              <Textarea
+                value={announcementPart2}
+                readOnly
+                className="min-h-[50px] pr-12 text-sm resize-none"
+              />
+              <Button
+                size="icon"
+                variant="ghost"
+                className="absolute top-2 right-2 h-8 w-8"
+                onClick={handleCopyPart2}
+                title="Copy part 2"
+              >
+                {copied2 ? (
+                  <Check className="h-4 w-4 text-green-500" />
+                ) : (
+                  <Copy className="h-4 w-4" />
+                )}
+              </Button>
+            </div>
+          </div>
+
           {!rafflerName && (
             <p className="text-xs text-muted-foreground">
               💡 Set your Raffler Name in User Management to personalize announcements.
