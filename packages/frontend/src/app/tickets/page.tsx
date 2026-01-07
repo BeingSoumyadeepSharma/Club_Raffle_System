@@ -84,15 +84,13 @@ export default function TicketsPage() {
       // Determine the default selected entity based on user role
       let defaultEntity = "all";
       if (user && user.role !== "superuser") {
-        // For non-superusers, default to their first assigned entity
-        if (user.assignedEntities.length > 0) {
-          // Find the first assigned entity that exists
-          const firstAssigned = user.assignedEntities.find(id => 
-            entitiesData.some(e => e.id === id)
-          );
-          if (firstAssigned) {
-            defaultEntity = firstAssigned;
-          }
+        // For non-superusers, default to their first available entity
+        // (entities are already filtered by the backend to only show accessible ones)
+        if (entitiesData.length > 0) {
+          defaultEntity = entitiesData[0].id;
+        } else {
+          // No entities available - set to empty string
+          defaultEntity = "";
         }
       }
       
@@ -100,12 +98,16 @@ export default function TicketsPage() {
       setInitialized(true);
       
       // Load purchases based on the default entity
-      if (defaultEntity !== "all") {
+      if (defaultEntity && defaultEntity !== "all") {
         await loadActiveSession(defaultEntity);
         await loadPurchases(defaultEntity, showCurrentSessionOnly);
-      } else {
+      } else if (defaultEntity === "all") {
         const purchasesData = await getPurchases();
         setPurchases(purchasesData);
+        setLoading(false);
+      } else {
+        // No entity selected
+        setPurchases([]);
         setLoading(false);
       }
     } catch (error) {
@@ -198,6 +200,21 @@ ${totalTickets} tickets sold in total. ♥ WINNING AMOUNT is now $${winningAmoun
           <div className="text-4xl mb-4">🎟️</div>
           <p className="text-muted-foreground">Loading...</p>
         </div>
+      </div>
+    );
+  }
+
+  // Show message if user has no entities assigned
+  if (entities.length === 0 && user.role !== "superuser") {
+    return (
+      <div className="flex items-center justify-center h-[60vh]">
+        <Card className="p-8 text-center max-w-md">
+          <div className="text-6xl mb-4">🔒</div>
+          <h3 className="text-xl font-semibold mb-2">No Club Access</h3>
+          <p className="text-muted-foreground">
+            You haven&apos;t been assigned to any clubs yet. Please contact your administrator to get access to club entities.
+          </p>
+        </Card>
       </div>
     );
   }

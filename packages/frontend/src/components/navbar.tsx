@@ -138,13 +138,13 @@ export function Navbar() {
               <span className="text-xs">{user.username}</span>
             </div>
           )}
-          <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+          <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen} modal={true}>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon">
                 <Menu className="h-5 w-5" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-[280px]">
+            <SheetContent side="right" className="w-[280px]" onInteractOutside={() => setMobileMenuOpen(false)}>
               <div className="flex flex-col gap-4 mt-8">
                 <NavLinks mobile />
                 <div className="border-t pt-4 mt-4">

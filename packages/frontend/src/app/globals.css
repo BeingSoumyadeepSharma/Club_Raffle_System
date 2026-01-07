@@ -55,6 +55,8 @@
   }
   body {
     @apply bg-background text-foreground;
+    /* Fix for Radix UI dialog pointer-events issue */
+    pointer-events: auto !important;
   }
 }
 
