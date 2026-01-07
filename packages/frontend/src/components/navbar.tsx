@@ -8,7 +8,8 @@ import { useAuth, ROLE_LABELS } from "@/lib/auth-context";
 import { useTheme } from "@/lib/theme-context";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Home, Building2, Ticket, Users, LogIn, LogOut, Crown, Shield, Briefcase, Menu, Sun, Moon } from "lucide-react";
+import { Home, Building2, Ticket, Users, LogIn, LogOut, Crown, Shield, Briefcase, Menu, Sun, Moon, Settings } from "lucide-react";
+import { ProfileDialog } from "@/components/profile-dialog";
 
 const navItems = [
   { href: "/", label: "Dashboard", icon: Home },
@@ -105,6 +106,9 @@ export function Navbar() {
             <span className="text-sm text-muted-foreground">Loading...</span>
           ) : user ? (
             <>
+              {/* Profile Settings */}
+              <ProfileDialog />
+              
               <div className="flex items-center gap-2 text-sm">
                 {RoleIcon && <RoleIcon className="h-4 w-4 text-primary" />}
                 <span>{user.username}</span>
@@ -157,6 +161,14 @@ export function Navbar() {
                         <span>{user.username}</span>
                         <span className="text-xs text-muted-foreground">({ROLE_LABELS[user.role]})</span>
                       </div>
+                      <ProfileDialog 
+                        trigger={
+                          <Button variant="outline" size="sm" className="w-full gap-2">
+                            <Settings className="h-4 w-4" />
+                            Profile Settings
+                          </Button>
+                        } 
+                      />
                       <Button variant="outline" size="sm" onClick={() => { handleLogout(); setMobileMenuOpen(false); }} className="w-full gap-2">
                         <LogOut className="h-4 w-4" />
                         Logout
