@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { PurchaseCard } from "@/components/purchase-card";
+import { PurchaseTable } from "@/components/purchase-table";
 import { PurchaseTicketsDialog } from "@/components/purchase-tickets-dialog";
 import { ReceiptModal } from "@/components/receipt-modal";
 import { SessionControl } from "@/components/session-control";
@@ -451,35 +451,22 @@ export default function TicketsPage() {
           )}
         </Card>
       ) : (
-        <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-          {purchases.map((purchase) => (
-            <PurchaseCard
-              key={purchase.id}
-              purchase={purchase}
-              entity={entities.find((e) => e.id === purchase.entityId)}
-              onViewReceipt={(r) => {
-                setReceipt(r);
-                setShowReceipt(true);
-              }}
-              onDelete={() => {
-                if (selectedEntity !== "all") {
-                  loadActiveSession(selectedEntity);
-                  loadPurchases(selectedEntity, showCurrentSessionOnly);
-                } else {
-                  loadData();
-                }
-              }}
-              onUpdate={() => {
-                if (selectedEntity !== "all") {
-                  loadActiveSession(selectedEntity);
-                  loadPurchases(selectedEntity, showCurrentSessionOnly);
-                } else {
-                  loadData();
-                }
-              }}
-            />
-          ))}
-        </div>
+        <PurchaseTable
+          purchases={purchases}
+          entities={entities}
+          onViewReceipt={(r) => {
+            setReceipt(r);
+            setShowReceipt(true);
+          }}
+          onDataChange={() => {
+            if (selectedEntity !== "all") {
+              loadActiveSession(selectedEntity);
+              loadPurchases(selectedEntity, showCurrentSessionOnly);
+            } else {
+              loadData();
+            }
+          }}
+        />
       )}
 
       {/* Receipt Modal */}
